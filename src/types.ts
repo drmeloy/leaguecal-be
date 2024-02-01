@@ -1,10 +1,14 @@
 import { Request } from "express";
+import { Document, Model } from "mongoose";
 
 export type User = {
-  id: number;
   username: string;
+  password: string;
 }
 
-export interface RequestWithUser extends Request {
+export type RequestWithUser = Request & {
   user?: User;
 }
+
+export type MongoUserDocument = User & Document;
+export type MongoUserModel = Model<MongoUserDocument>;
