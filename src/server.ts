@@ -1,16 +1,17 @@
 require('dotenv').config();
 import express, { Response } from 'express';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import mongoose from 'mongoose';
 import { verifyJWT } from './middleware';
 import { MongoUserDocument, RequestWithUser } from './types';
-import mongoose, { ConnectOptions } from 'mongoose';
 import { mongoURI, secretKey } from './constants';
 import User from './models';
 
 const app = express();
 const port = 3001;
 
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true } as ConnectOptions);
+mongoose.connect(mongoURI);
 
 const db = mongoose.connection;
 
@@ -36,7 +37,9 @@ app.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid username or password' });
     }
 
-    if (user.password !== password) {
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordMatch) {
       return res.status(401).json({ message: 'Invalid username or password' });
     }
 
