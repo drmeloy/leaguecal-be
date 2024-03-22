@@ -2,6 +2,7 @@ require('dotenv').config();
 import express, { Response } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import cors from 'cors';
 import mongoose from 'mongoose';
 import { verifyJWT } from './middleware';
 import { MongoUserDocument, RequestWithUser } from './types';
@@ -20,6 +21,7 @@ db.once('open', () => {
   console.log('Connected to MongoDB');
 });
 
+app.use(cors());
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -45,7 +47,8 @@ app.post('/login', async (req, res) => {
 
     jwt.sign({ user }, secretKey, { expiresIn: '1h' }, (err, token) => {
       if (err) throw err;
-      res.json({ token });
+      res.setHeader('Set-Cookie', `authToken=${token}; HttpOnly`);
+      return res.status(200).json({ message: 'Login success!' });
     });
   } catch (error) {
     console.error(error);
